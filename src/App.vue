@@ -1,17 +1,72 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div>
+    <Header />
+    <div v-if="loading">fetching data</div>
+    <div v-else>
+      <date-title :text="title" :dateStamp="dateStamp" />
+      <data-boxes :stats="status" />
+      <country-picker :countries="countries" @get-country="getCountryData" />
+    </div>
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Header from "./components/Header.vue";
+import DateTitle from "./components/DateTitle.vue";
+import CountryPicker from "./components/CountryPicker.vue";
+import DataBoxes from "./components/DataBoxes.vue";
+import { ref } from "vue";
+import axios from "axios";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    Header,
+    DateTitle,
+    CountryPicker,
+    DataBoxes,
+  },
+  data() {
+    return {
+      dateStamp: Date.now(),
+      cases: "Cases",
+      deaths: "Deaths",
+    };
+  },
+  setup() {
+    const loading = ref(true);
+    const status = ref({});
+    const countries = ref([]);
+    const title = ref("Global");
+
+    const fetchCovidData = async () => {
+      const { data } = await axios.get("https://api.covid19api.com/summary");
+      return data;
+    };
+
+    const getCountryData = (country) => {
+      status.value = country;
+      title.value = country.Country;
+    };
+
+    const baseSetup = async () => {
+      const data = await fetchCovidData();
+      status.value = data.Global;
+      countries.value = data.Countries;
+      loading.value = false;
+    };
+
+    baseSetup();
+
+    return {
+      loading,
+      title,
+      status,
+      countries,
+      getCountryData,
+    };
+  },
+};
 </script>
 
 <style>
@@ -21,6 +76,11 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
 }
 </style>
