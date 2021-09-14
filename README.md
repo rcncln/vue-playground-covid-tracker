@@ -1,4 +1,5 @@
 # tracker
+A simple covid tracker in order to learn the basics of the vue framework
 
 ## Project setup
 ```
